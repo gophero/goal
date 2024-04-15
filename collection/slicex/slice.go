@@ -1,7 +1,7 @@
 package slicex
 
 import (
-	"github.com/gophero/goal/str"
+	"github.com/gophero/goal/stringx"
 	"reflect"
 	"sort"
 	"strings"
@@ -96,7 +96,7 @@ func (s S[T]) Filter(cond func(a T) bool) S[T] {
 func (s S[T]) Join(sep string) string {
 	var ret []string
 	for _, a := range s {
-		ret = append(ret, str.String(a))
+		ret = append(ret, stringx.String(a))
 	}
 	return strings.Join(ret, sep)
 }
