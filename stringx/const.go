@@ -1,4 +1,4 @@
-package str
+package stringx
 
 const (
 	Ampersand       = "&"

@@ -1,8 +1,8 @@
-package str_test
+package stringx_test
 
 import (
 	"github.com/gophero/goal/assert"
-	"github.com/gophero/goal/str"
+	"github.com/gophero/goal/stringx"
 	"github.com/gophero/goal/testx"
 	"testing"
 )
@@ -17,7 +17,7 @@ func TestBlurEmail(t *testing.T) {
 		{"belonk@126.com", "be****k@126.com"},
 	}
 	for _, c := range cases {
-		dst := str.BlurEmail(c.email)
+		dst := stringx.BlurEmail(c.email)
 		if dst != c.expect {
 			t.Errorf("test failed, expect: %v, but found: %v", c.expect, dst)
 		}
@@ -25,27 +25,27 @@ func TestBlurEmail(t *testing.T) {
 }
 
 func TestEndsWith(t *testing.T) {
-	assert.True(str.EndsWith("", ""))
-	assert.True(str.EndsWith("a", ""))
-	assert.True(!str.EndsWith("", "a"))
+	assert.True(stringx.EndsWith("", ""))
+	assert.True(stringx.EndsWith("a", ""))
+	assert.True(!stringx.EndsWith("", "a"))
 
 	s := "aaabb123b"
-	assert.True(str.EndsWith(s, "b"))
-	assert.True(str.EndsWith(s, "3b"))
-	assert.True(str.EndsWith(s, "23b"))
-	assert.True(str.EndsWith(s, "123b"))
-	assert.True(!str.EndsWith(s, "a"))
+	assert.True(stringx.EndsWith(s, "b"))
+	assert.True(stringx.EndsWith(s, "3b"))
+	assert.True(stringx.EndsWith(s, "23b"))
+	assert.True(stringx.EndsWith(s, "123b"))
+	assert.True(!stringx.EndsWith(s, "a"))
 
-	assert.True(str.StartsWith("", ""))
-	assert.True(str.StartsWith("a", ""))
-	assert.True(!str.StartsWith("", "a"))
+	assert.True(stringx.StartsWith("", ""))
+	assert.True(stringx.StartsWith("a", ""))
+	assert.True(!stringx.StartsWith("", "a"))
 
-	assert.True(str.StartsWith(s, "a"))
-	assert.True(str.StartsWith(s, "aa"))
-	assert.True(str.StartsWith(s, "aaa"))
-	assert.True(str.StartsWith(s, "aaab"))
-	assert.True(!str.StartsWith(s, "aaab1"))
-	assert.True(!str.StartsWith(s, "1aaab1"))
+	assert.True(stringx.StartsWith(s, "a"))
+	assert.True(stringx.StartsWith(s, "aa"))
+	assert.True(stringx.StartsWith(s, "aaa"))
+	assert.True(stringx.StartsWith(s, "aaab"))
+	assert.True(!stringx.StartsWith(s, "aaab1"))
+	assert.True(!stringx.StartsWith(s, "1aaab1"))
 }
 
 func TestCamelCaseToUnderscore(t *testing.T) {
@@ -63,7 +63,7 @@ func TestCamelCaseToUnderscore(t *testing.T) {
 	tl.Case("camelcase to underscore")
 
 	for _, c := range cs {
-		r := str.CamelCaseToUnderscore(c[0])
+		r := stringx.CamelCaseToUnderscore(c[0])
 		tl.Require(r == c[1], "expect result is: %v, but is: %v", c[1], r)
 	}
 }
@@ -81,7 +81,7 @@ func TestUnderscoreToCamelCase(t *testing.T) {
 	tl.Case("camelcase to underscore")
 
 	for _, c := range cs {
-		r := str.UnderscoreToCamelCase(c[1])
+		r := stringx.UnderscoreToCamelCase(c[1])
 		tl.Require(r == c[0], "expect result is: %v, but is: %v", c[0], r)
 	}
 }
