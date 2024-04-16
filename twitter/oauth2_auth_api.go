@@ -93,7 +93,7 @@ func (o *OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, 
 		return EmptyAccessToken, errors.Wrapf(ApiError, "invalid state")
 	}
 	var body = strings.NewReader(
-		NewFormParam().
+		NewGetParam().
 			Append("code", code).
 			Append("grant_type", "authorization_code").
 			Append("redirect_uri", redirectUri).

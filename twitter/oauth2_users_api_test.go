@@ -34,7 +34,7 @@ func TestFollowers(t *testing.T) {
 	fmt.Println(users)
 	ff := twitter.NewFieldFilter()
 	ff.AddUserField(twitter.UserFieldId, twitter.UserFieldProfileImageUrl, twitter.UserFieldCreatedAt, twitter.UserFieldVerified, twitter.UserFieldWithHeld, twitter.UserFieldDescription, twitter.UserFieldLocation)
-	users, err = twitter.OAuth2Apis.User.Followers(at, id, ff, twitter.OAuth2Apis.User.Param.MaxResults(1000), twitter.OAuth2Apis.User.Param.PaginationToken("test_token"))
+	users, err = twitter.OAuth2Apis.User.Followers(at, id, ff, twitter.GetParamOptions.MaxResults(1000), twitter.GetParamOptions.PaginationToken("test_token"))
 	if err != nil {
 		t.Fatal(err)
 	}

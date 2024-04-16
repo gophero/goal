@@ -1,27 +1,32 @@
 package twitter
 
-import "github.com/gophero/goal/stringx"
+import (
+	"github.com/gophero/goal/conv"
+	"github.com/gophero/goal/stringx"
+)
 
-type FormParam struct {
+var GetParamOptions getParamOptions
+
+type GetParam struct {
 	builder *stringx.Builder
 }
 
-func NewFormParam() *FormParam {
-	return &FormParam{builder: stringx.NewBuilder()}
+func NewGetParam() *GetParam {
+	return &GetParam{builder: stringx.NewBuilder()}
 }
 
-func (sp *FormParam) Param() string {
+func (sp *GetParam) Param() string {
 	return stringx.Trimright(sp.builder.String(), stringx.Ampersand)
 }
 
-func (sp *FormParam) Append(k string, v ...string) *FormParam {
+func (sp *GetParam) Append(k string, v ...string) *GetParam {
 	for _, s := range v {
 		sp.builder.WriteString(k).WriteString("=").WriteString(s).WriteString(stringx.Ampersand)
 	}
 	return sp
 }
 
-func (sp *FormParam) FilterFields(ff *FieldFilter) *FormParam {
+func (sp *GetParam) FilterFields(ff *FieldFilter) *GetParam {
 	if ff != nil {
 		if len(ff.Expansions) > 0 {
 			sp.Append("expansions", formatExpansion(ff.Expansions...))
@@ -36,4 +41,22 @@ func (sp *FormParam) FilterFields(ff *FieldFilter) *FormParam {
 	return sp
 }
 
-type FormParamOption func(p *FormParam)
+type GetParamOption func(p *GetParam)
+
+type getParamOptions struct {
+}
+
+func (o getParamOptions) MaxResults(maxResults uint32) GetParamOption {
+	if maxResults < 1 || maxResults > 1000 {
+		maxResults = 100
+	}
+	return func(p *GetParam) {
+		p.Append("max_results", conv.Uint32ToStr(maxResults))
+	}
+}
+
+func (o getParamOptions) PaginationToken(pt string) GetParamOption {
+	return func(p *GetParam) {
+		p.Append("pagination_token", pt)
+	}
+}

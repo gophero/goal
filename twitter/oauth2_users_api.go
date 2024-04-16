@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophero/goal/conv"
 	"github.com/pkg/errors"
 )
 
@@ -21,23 +20,7 @@ const (
 type OAuth2UserApiFormParamOptions struct {
 }
 
-func (o OAuth2UserApiFormParamOptions) MaxResults(maxResults uint32) FormParamOption {
-	if maxResults < 1 || maxResults > 1000 {
-		maxResults = 100
-	}
-	return func(p *FormParam) {
-		p.Append("max_results", conv.Uint32ToStr(maxResults))
-	}
-}
-
-func (o OAuth2UserApiFormParamOptions) PaginationToken(pt string) FormParamOption {
-	return func(p *FormParam) {
-		p.Append("pagination_token", pt)
-	}
-}
-
 type OAuth2UserApi struct {
-	Param OAuth2UserApiFormParamOptions
 }
 
 func NewOAuth2UserApi() *OAuth2UserApi {
@@ -49,7 +32,7 @@ func (o *OAuth2UserApi) meUrl() string {
 }
 
 func (o *OAuth2UserApi) Me(accessToken string, ff *FieldFilter) (*UserInfo, error) {
-	var body = strings.NewReader(NewFormParam().FilterFields(ff).Param())
+	var body = strings.NewReader(NewGetParam().FilterFields(ff).Param())
 	req, err := http.NewRequest(http.MethodGet, o.meUrl(), body)
 	if err != nil {
 		return nil, errors.Wrapf(ApiError, "request error: %v", err)
@@ -75,9 +58,9 @@ func (o *OAuth2UserApi) Me(accessToken string, ff *FieldFilter) (*UserInfo, erro
 	return result.Data, nil
 }
 
-func (o *OAuth2UserApi) Followers(accessToken, id string, ff *FieldFilter, options ...FormParamOption) ([]*UserInfo, error) {
+func (o *OAuth2UserApi) Followers(accessToken, id string, ff *FieldFilter, options ...GetParamOption) ([]*UserInfo, error) {
 	var url = fmt.Sprintf(oauth2ApiUrlFormat, "/users/"+id+"/followers")
-	var params = NewFormParam().FilterFields(ff)
+	var params = NewGetParam().FilterFields(ff)
 	for _, p := range options {
 		p(params)
 	}

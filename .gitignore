@@ -30,3 +30,5 @@ log
 *.vim
 bin
 .vscode
+
+ignore_test.go
