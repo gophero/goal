@@ -3,13 +3,12 @@ package twitter
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gophero/goal/collection/slicex"
-	"github.com/gophero/goal/stringx"
 	"io"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/gophero/goal/conv"
 	"github.com/pkg/errors"
 )
 
@@ -19,149 +18,92 @@ const (
 	tweetFieldKey = "tweet.fields"
 )
 
+type OAuth2UserApiFormParamOptions struct {
+}
+
+func (o OAuth2UserApiFormParamOptions) MaxResults(maxResults uint32) FormParamOption {
+	if maxResults < 1 || maxResults > 1000 {
+		maxResults = 100
+	}
+	return func(p *FormParam) {
+		p.Append("max_results", conv.Uint32ToStr(maxResults))
+	}
+}
+
+func (o OAuth2UserApiFormParamOptions) PaginationToken(pt string) FormParamOption {
+	return func(p *FormParam) {
+		p.Append("pagination_token", pt)
+	}
+}
+
 type OAuth2UserApi struct {
+	Param OAuth2UserApiFormParamOptions
 }
 
-func NewOAuth2UserApi() OAuth2AuthApi {
-	return OAuth2AuthApi{}
+func NewOAuth2UserApi() *OAuth2UserApi {
+	return &OAuth2UserApi{}
 }
 
-func (o OAuth2UserApi) meUrl() string {
+func (o *OAuth2UserApi) meUrl() string {
 	return fmt.Sprintf(oauth2ApiUrlFormat, "/users/me")
 }
 
-type FieldFilter struct {
-	Expansions    []Expansion
-	TwitterFields []TwitterField
-	UserFields    []UserField
-}
-
-func NewFieldFilter() *FieldFilter {
-	return &FieldFilter{}
-}
-
-func (ff *FieldFilter) AddExpansion(exps ...Expansion) *FieldFilter {
-	ff.Expansions = append(ff.Expansions, exps...)
-	return ff
-}
-
-func (ff *FieldFilter) AddTwitterField(tfs ...TwitterField) *FieldFilter {
-	ff.TwitterFields = append(ff.TwitterFields, tfs...)
-	return ff
-}
-
-func (ff *FieldFilter) AddUserField(ufs ...UserField) *FieldFilter {
-	ff.UserFields = append(ff.UserFields, ufs...)
-	return ff
-}
-
-func (o OAuth2UserApi) Me(accessToken string, ff *FieldFilter) (UserInfo, error) {
-	var params = ""
-	if ff != nil {
-		var builder = stringx.NewBuilder()
-		if len(ff.Expansions) > 0 {
-			builder.WriteString("expansions=").WriteString(formatExpansion(ff.Expansions...)).WriteString("&")
-		}
-		if len(ff.UserFields) > 0 {
-			builder.WriteString("user.fields=").WriteString(formatUserFields(ff.UserFields...)).WriteString("&")
-		}
-		if len(ff.TwitterFields) > 0 {
-			builder.WriteString("tweet.fields=").WriteString(formatTweetFields(ff.TwitterFields...))
-		}
-		params = strings.TrimRight(builder.String(), "&")
-	}
-	var body = strings.NewReader(params)
+func (o *OAuth2UserApi) Me(accessToken string, ff *FieldFilter) (*UserInfo, error) {
+	var body = strings.NewReader(NewFormParam().FilterFields(ff).Param())
 	req, err := http.NewRequest(http.MethodGet, o.meUrl(), body)
 	if err != nil {
-		return EmptyUserInfo, errors.Wrapf(ApiError, "request error: %v", err)
+		return nil, errors.Wrapf(ApiError, "request error: %v", err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Authorization", "Bearer "+accessToken)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return EmptyUserInfo, errors.Wrapf(ApiError, "request error: %v", err)
+		return nil, errors.Wrapf(ApiError, "request error: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.Wrapf(ApiError, "request error: %v", resp.Status)
 	}
 	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return EmptyUserInfo, err
+		return nil, err
 	}
-	var result Result[UserInfo]
+
+	var result Result[*UserInfo]
 	if err := json.Unmarshal(bs, &result); err != nil {
-		return EmptyUserInfo, errors.Wrapf(ApiError, "invalid response: %v", string(bs))
+		return nil, errors.Wrapf(ApiError, "invalid response: %v", string(bs))
 	}
 	return result.Data, nil
 }
 
-type Expansion string
-type TwitterField string
-type UserField string
-
-const (
-	ExpansionPinnedTweetId Expansion = "pinned_tweet_id"
-)
-
-const (
-	TwitterFieldAttachments        TwitterField = "attachments"
-	TwitterFieldAuthorId                        = "author_id"
-	TwitterFieldContextAnnotations              = "context_annotations"
-	TwitterFieldConversationId                  = "conversation_id"
-	TwitterFieldCreatedAt                       = "created_at"
-	TwitterFieldEditControls                    = "edit_controls"
-	TwitterFieldEntities                        = "entities"
-	TwitterFieldGeo                             = "geo"
-	TwitterFieldId                              = "id"
-	TwitterFieldInReplyToUserId                 = "in_reply_to_user_id"
-	TwitterFieldLang                            = "lang"
-	TwitterFieldNonPublicMetrics                = "non_public_metrics"
-	TwitterFieldPublicMetrics                   = "public_metrics"
-	TwitterFieldOrganicMetrics                  = "organic_metrics"
-	TwitterFieldPromotedMetrics                 = "promoted_metrics"
-	TwitterFieldPossiblySensitive               = "possibly_sensitive"
-	TwitterFieldReferencedTweets                = "referenced_tweets"
-	TwitterFieldReplySettings                   = "reply_settings"
-	TwitterFieldSource                          = "source "
-	TwitterFieldText                            = "text"
-	TwitterFieldWithheld                        = "withheld"
-)
-
-const (
-	UserFieldCreatedAt         UserField = "created_at"
-	UserFieldDescription                 = "description"
-	UserFieldEntities                    = "entities"
-	UserFieldId                          = "id"
-	UserFieldLocation                    = "location"
-	UserFieldMostRecentTweetId           = "most_recent_tweet_id"
-	UserFieldName                        = "name"
-	UserFieldPinnedTweetId               = "pinned_tweet_id"
-	UserFieldProfileImageUrl             = "profile_image_url"
-	UserFieldProtected                   = "protected"
-	UserFieldPublicMetrics               = "public_metrics"
-	UserFieldUrl                         = "url"
-	UserFieldUserName                    = "username"
-	UserFieldVerified                    = "verified"
-	UserFieldVerifiedType                = "verified_type"
-	UserFieldWithHeld                    = "withheld"
-)
-
-func formatExpansion(exps ...Expansion) string {
-	rs := slicex.Eachv(exps, func(v Expansion) string {
-		return string(v)
-	})
-	return strings.Join(rs, ",")
-}
-
-func formatTweetFields(tfs ...TwitterField) string {
-	rs := slicex.Eachv(tfs, func(v TwitterField) string {
-		return string(v)
-	})
-	return strings.Join(rs, ",")
-}
-
-func formatUserFields(ufs ...UserField) string {
-	rs := slicex.Eachv(ufs, func(v UserField) string {
-		return string(v)
-	})
-	return strings.Join(rs, ",")
+func (o *OAuth2UserApi) Followers(accessToken, id string, ff *FieldFilter, options ...FormParamOption) ([]*UserInfo, error) {
+	var url = fmt.Sprintf(oauth2ApiUrlFormat, "/users/"+id+"/followers")
+	var params = NewFormParam().FilterFields(ff)
+	for _, p := range options {
+		p(params)
+	}
+	var body = strings.NewReader(params.Param())
+	req, err := http.NewRequest(http.MethodGet, url, body)
+	if err != nil {
+		return []*UserInfo{}, errors.Wrapf(ApiError, "request error: %v", err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return []*UserInfo{}, errors.Wrapf(ApiError, "request error: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return []*UserInfo{}, errors.Wrapf(ApiError, "request error: %v", resp.Status)
+	}
+	bs, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []*UserInfo{}, err
+	}
+	var result Result[[]*UserInfo]
+	if err := json.Unmarshal(bs, &result); err != nil {
+		return []*UserInfo{}, errors.Wrapf(ApiError, "invalid response: %v", string(bs))
+	}
+	return result.Data, nil
 }
 
 var EmptyUserInfo UserInfo
@@ -242,4 +184,10 @@ type PublicMetrics struct {
 
 type Include struct {
 	Tweets []Tweet `json:"tweets"`
+}
+
+type Meta struct {
+	ResultCount   uint32 `json:"result_count"`
+	PreviousToken string `json:"previous_token"`
+	NextToken     string `json:"next_token"`
 }

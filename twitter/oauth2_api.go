@@ -13,12 +13,15 @@ var ApiError = fmt.Errorf("twitter api error")
 var OAuth2Apis = NewOAuth2Api(NewOAuth2AuthApi(nil))
 
 type OAuth2Api struct {
-	AuthApi OAuth2AuthApi
-	UserApi OAuth2UserApi
+	Auth *OAuth2AuthApi
+	User *OAuth2UserApi
 }
 
-func NewOAuth2Api(authApi OAuth2AuthApi) OAuth2Api {
-	return OAuth2Api{AuthApi: authApi}
+func NewOAuth2Api(authApi *OAuth2AuthApi) OAuth2Api {
+	return OAuth2Api{
+		Auth: authApi,
+		User: NewOAuth2UserApi(),
+	}
 }
 
 type Error struct {
@@ -29,5 +32,6 @@ type Error struct {
 }
 
 type Result[T any] struct {
-	Data T `json:"data"`
+	Data T    `json:"data"`
+	Meta Meta `json:"meta"`
 }

@@ -59,14 +59,14 @@ type OAuth2AuthApi struct {
 	sm StateMap
 }
 
-func NewOAuth2AuthApi(sm StateMap) OAuth2AuthApi {
+func NewOAuth2AuthApi(sm StateMap) *OAuth2AuthApi {
 	if sm == nil {
 		sm = NewLocalStateMap()
 	}
-	return OAuth2AuthApi{sm: sm}
+	return &OAuth2AuthApi{sm: sm}
 }
 
-func (o OAuth2AuthApi) AuthorizeUrl(clientID, redirectUri string, scope ...Scope) string {
+func (o *OAuth2AuthApi) AuthorizeUrl(clientID, redirectUri string, scope ...Scope) string {
 	scopes := formatScopes(scope...)
 	code_challenge := stringx.Randn(16)
 	state := stringx.Randn(16)
@@ -74,40 +74,47 @@ func (o OAuth2AuthApi) AuthorizeUrl(clientID, redirectUri string, scope ...Scope
 	return fmt.Sprintf(auth2AuthorizeUrlFormat, clientID, redirectUri, scopes, state, code_challenge)
 }
 
-func (o OAuth2AuthApi) tokenUrl() string {
+func (o *OAuth2AuthApi) tokenUrl() string {
 	return fmt.Sprintf(oauth2ApiUrlFormat, "/oauth2/token")
 }
 
-func (o OAuth2AuthApi) revokeTokenUrl() string {
+func (o *OAuth2AuthApi) revokeTokenUrl() string {
 	return fmt.Sprintf(oauth2ApiUrlFormat, "/oauth2/revoke")
 }
 
-func (o OAuth2AuthApi) encodeClient(clientId, clientSecret string) string {
+func (o *OAuth2AuthApi) encodeClient(clientId, clientSecret string) string {
 	dest := clientId + ":" + clientSecret
 	return base64.StdEncoding.EncodeToString([]byte(dest))
 }
 
-func (o OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, redirectUri string) (AccessToken, error) {
+func (o *OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, redirectUri string) (AccessToken, error) {
 	var challengeCode = o.sm.Get(state)
 	if challengeCode == "" { // TODO not graceful
 		return EmptyAccessToken, errors.Wrapf(ApiError, "invalid state")
 	}
-	var builder = stringx.NewBuilder()
-	builder.WriteString("code=").WriteString(code).WriteString("&")
-	builder.WriteString("grant_type=authorization_code").WriteString("&")
-	builder.WriteString("redirect_uri=").WriteString(redirectUri).WriteString("&")
-	builder.WriteString("code_verifier=").WriteString(challengeCode)
-	var body = strings.NewReader(builder.String())
+	var body = strings.NewReader(
+		NewFormParam().
+			Append("code", code).
+			Append("grant_type", "authorization_code").
+			Append("redirect_uri", redirectUri).
+			Append("code_verifier", challengeCode).
+			Param(),
+	)
 	req, err := http.NewRequest(http.MethodPost, o.tokenUrl(), body)
 	if err != nil {
 		return EmptyAccessToken, errors.Wrapf(ApiError, "request error: %v", err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Authorization", "Basic "+o.encodeClient(clientId, clientSecret))
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return EmptyAccessToken, errors.Wrapf(ApiError, "request error: %v", err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return AccessToken{}, errors.Wrapf(ApiError, "request error: %v", resp.Status)
+	}
+
 	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return EmptyAccessToken, err
@@ -119,7 +126,7 @@ func (o OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, r
 	return accessToken, nil
 }
 
-func (o OAuth2AuthApi) RefreshAccessToken(clientId, clientSecret, refreshToken string) (AccessToken, error) {
+func (o *OAuth2AuthApi) RefreshAccessToken(clientId, clientSecret, refreshToken string) (AccessToken, error) {
 	var builder = stringx.NewBuilder()
 	builder.WriteString("refresh_token=").WriteString(refreshToken).WriteString("&")
 	builder.WriteString("grant_type=refresh_token").WriteString("&")
@@ -135,6 +142,10 @@ func (o OAuth2AuthApi) RefreshAccessToken(clientId, clientSecret, refreshToken s
 	if err != nil {
 		return EmptyAccessToken, errors.Wrapf(ApiError, "request error: %v", err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return AccessToken{}, errors.Wrapf(ApiError, "request error: %v", resp.Status)
+	}
+
 	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return EmptyAccessToken, err
@@ -146,7 +157,7 @@ func (o OAuth2AuthApi) RefreshAccessToken(clientId, clientSecret, refreshToken s
 	return accessToken, nil
 }
 
-func (o OAuth2AuthApi) RevokeAccessToken(clientId, clientSecret string, token string) error {
+func (o *OAuth2AuthApi) RevokeAccessToken(clientId, clientSecret string, token string) error {
 	var builder = stringx.NewBuilder()
 	builder.WriteString("token=").WriteString(token).WriteString("&")
 	builder.WriteString("token_type_hint=access_token")
@@ -161,6 +172,10 @@ func (o OAuth2AuthApi) RevokeAccessToken(clientId, clientSecret string, token st
 	if err != nil {
 		return errors.Wrapf(ApiError, "request error: %v", err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.Wrapf(ApiError, "request error: %v", resp.Status)
+	}
+
 	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
