@@ -27,14 +27,14 @@ func TestMe(t *testing.T) {
 
 func TestFollowers(t *testing.T) {
 	id := "1776491059318792192"
-	users, err := twitter.OAuth2Apis.User.Followers(at, id, nil)
+	users, _, err := twitter.OAuth2Apis.User.Followers(at, id, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	fmt.Println(users)
 	ff := twitter.NewFieldFilter()
 	ff.AddUserField(twitter.UserFieldId, twitter.UserFieldProfileImageUrl, twitter.UserFieldCreatedAt, twitter.UserFieldVerified, twitter.UserFieldWithHeld, twitter.UserFieldDescription, twitter.UserFieldLocation)
-	users, err = twitter.OAuth2Apis.User.Followers(at, id, ff, twitter.GetParamOptions.MaxResults(1000), twitter.GetParamOptions.PaginationToken("test_token"))
+	users, _, err = twitter.OAuth2Apis.User.Followers(at, id, ff, twitter.GetParamOptions.MaxResults(1000), twitter.GetParamOptions.PaginationToken("test_token"))
 	if err != nil {
 		t.Fatal(err)
 	}

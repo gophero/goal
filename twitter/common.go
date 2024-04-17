@@ -6,6 +6,24 @@ import (
 	"github.com/gophero/goal/collection/slicex"
 )
 
+type Error struct {
+	Status int    `json:"status"`
+	Title  string `json:"title"`
+	Type   string `json:"type"`
+	Detail string `json:"detail"`
+}
+
+type Result[T any] struct {
+	Data T    `json:"data"`
+	Meta Meta `json:"meta"`
+}
+
+type Meta struct {
+	ResultCount   uint32 `json:"result_count"`
+	PreviousToken string `json:"previous_token"`
+	NextToken     string `json:"next_token"`
+}
+
 type FieldFilter struct {
 	Expansions    []Expansion
 	TwitterFields []TwitterField

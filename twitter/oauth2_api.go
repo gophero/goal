@@ -25,15 +25,3 @@ func NewOAuth2Api(authApi *OAuth2AuthApi) OAuth2Api {
 		Tweet: NewOAuth2TweetApi(),
 	}
 }
-
-type Error struct {
-	Status int    `json:"status"`
-	Title  string `json:"title"`
-	Type   string `json:"type"`
-	Detail string `json:"detail"`
-}
-
-type Result[T any] struct {
-	Data T    `json:"data"`
-	Meta Meta `json:"meta"`
-}
