@@ -12,7 +12,7 @@ var url = "https://twitter.com/i/oauth2/authorize?response_type=code&client_id=%
 func TestRequestToken(t *testing.T) {
 	var state = ""
 	var redirectUri = "http://localhost:8080"
-	ak, err := twitter.OAuth2Apis.Auth.RequestAccessToken(testSetting.ClientId, testSetting.ClientSecret, code, state, redirectUri)
+	ak, err := twitter.OAuth2Apis.Auth.RequestAccessToken(testEnv.setting.ClientId, testEnv.setting.ClientSecret, testEnv.code, state, redirectUri)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,17 +20,18 @@ func TestRequestToken(t *testing.T) {
 }
 
 func TestRefreshToken(t *testing.T) {
-	refreshToken := rt
-	ss, err := twitter.OAuth2Apis.Auth.RefreshAccessToken(testSetting.ClientId, testSetting.ClientSecret, refreshToken)
+	refreshToken := testEnv.refrshToken
+	ss, err := twitter.OAuth2Apis.Auth.RefreshAccessToken(testEnv.setting.ClientId, testEnv.setting.ClientSecret, refreshToken)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(ss)
+	testEnv.accessToken = ss.AccessToken
+	testEnv.refrshToken = ss.RefreshToken
 }
 
 func TestRevokeToken(t *testing.T) {
-	token := at
-	err := twitter.OAuth2Apis.Auth.RevokeAccessToken(testSetting.ClientId, testSetting.ClientSecret, token)
+	token := testEnv.accessToken
+	err := twitter.OAuth2Apis.Auth.RevokeAccessToken(testEnv.setting.ClientId, testEnv.setting.ClientSecret, token)
 	if err != nil {
 		t.Fatal(err)
 	}

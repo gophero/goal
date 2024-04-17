@@ -3,23 +3,24 @@ package httpx_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gophero/goal/httpx"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+
+	"github.com/gophero/goal/httpx"
 )
 
 // 运行测试时会执行 example 代码，示例方法必须使用 fmt.println 输出，最后约定用 Output 输出一致的结果
 // 打印结果，如后边的 Output 输出结果必须一致，否则测试时会失败
 
-func ExampleBuilderGet() {
+func ExampleNewBuilder() {
 	// 启动示例 http 服务
 	startServer()
 
 	var ret string
 	// 构建 get 请求
 	httpx.NewBuilder("http://localhost:1234/html").WhenSuccess(func(resp *http.Response) { // 请求成功处理
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatalf("response body should be readable but not: %v", err)
 		}
@@ -60,7 +61,7 @@ func ExampleMustGet() {
 
 	var s string
 	httpx.MustGet("http://localhost:1234/json", func(resp *http.Response) {
-		bs, err := ioutil.ReadAll(resp.Body)
+		bs, err := io.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
@@ -76,7 +77,7 @@ func ExampleGet() {
 
 	var s string
 	httpx.Get("http://localhost:1234/json", func(resp *http.Response) {
-		bs, err := ioutil.ReadAll(resp.Body)
+		bs, err := io.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
@@ -116,10 +117,10 @@ type user struct {
 	Height float32 `json:"height"`
 }
 
-func ExampleGetJsonObject() {
+func ExampleGetJson() {
 	startServer()
 
-	u := httpx.GetJsonObject("http://localhost:1234/json", func(err error) {
+	u := httpx.GetJson("http://localhost:1234/json", func(err error) {
 		panic(err)
 	}, &user{})
 
@@ -129,10 +130,10 @@ func ExampleGetJsonObject() {
 	// {"name":"张三","age":20,"height":70.5}
 }
 
-func ExampleMustGetJsonObject() {
+func ExampleMustGetJson() {
 	startServer()
 
-	u := httpx.MustGetJsonObject("http://localhost:1234/json", &user{})
+	u := httpx.MustGetJson("http://localhost:1234/json", &user{})
 
 	bs, _ := json.Marshal(u)
 	fmt.Println(string(bs))

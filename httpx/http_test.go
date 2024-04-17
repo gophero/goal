@@ -3,13 +3,13 @@ package httpx_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gophero/goal/httpx"
-	"github.com/gophero/goal/testx"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"testing"
+
+	"github.com/gophero/goal/httpx"
+	"github.com/gophero/goal/testx"
 )
 
 const (
@@ -64,7 +64,7 @@ func TestHttp_BuilderGet(t *testing.T) {
 	logger.Case("GET html from baidu home page.")
 	httpx.NewBuilder("http://www.baidu.com").WhenSuccess(func(resp *http.Response) {
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			logger.Fail("should can read response data, but got error: %v", err)
 		} else {
@@ -81,7 +81,7 @@ func TestHttp_BuilderGet(t *testing.T) {
 
 	logger.Case("GET html from localhost:1234.")
 	httpx.NewBuilder("http://localhost:1234/html").WhenSuccess(func(resp *http.Response) {
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			logger.Fail("response body should be readable but not: %v", err)
 		} else {
@@ -122,7 +122,7 @@ func TestHttp_BuilderGet(t *testing.T) {
 }
 
 func jsonToUser(r io.Reader, logger *testx.Logger) {
-	body, err := ioutil.ReadAll(r)
+	body, err := io.ReadAll(r)
 	if err != nil {
 		logger.Fail("response body should be readable but not: %v", err)
 	} else {
@@ -140,7 +140,7 @@ func jsonToUser(r io.Reader, logger *testx.Logger) {
 	} else {
 		logger.Pass("response body should be able to unmarshal to struct")
 	}
-	if u == nil || u.Age == 0 || u.Name == "" {
+	if u.Age == 0 || u.Name == "" {
 		logger.Fail("response body unmarshalled to struct successfully but some fields have incorrect value")
 	} else {
 		logger.Pass("response body unmarshalled to struct successfully")
@@ -262,7 +262,7 @@ func TestHttp_GetJsonObject(t *testing.T) {
 	logger.Title("using GetJsonObject or MustGetJsonObject method to get object from json response")
 
 	logger.Case("GetJsonObject: request json from localhost:1234 and unmarshal it to user struct")
-	u := httpx.GetJsonObject("http://localhost:1234/json", func(err error) {
+	u := httpx.GetJson("http://localhost:1234/json", func(err error) {
 		logger.Require(err == nil, "request should be successful")
 	}, &user{})
 	logger.Require(u != nil, "request should be successful")
@@ -270,7 +270,7 @@ func TestHttp_GetJsonObject(t *testing.T) {
 	logger.Require(string(bs) == jsonstr, "return user should be correct")
 
 	logger.Case("MustGetJsonObject: request json from localhost:1234 and unmarshal it to user struct")
-	u = httpx.MustGetJsonObject("http://localhost:1234/json", &user{})
+	u = httpx.MustGetJson("http://localhost:1234/json", &user{})
 	bs, _ = json.Marshal(u)
 	logger.Require(u != nil, "request should be successful")
 	logger.Require(string(bs) == jsonstr, "return user should be correct")
