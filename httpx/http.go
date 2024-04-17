@@ -171,13 +171,13 @@ func (b *builder) WhenFailed(handler ErrHandler) *builder {
 
 // convenient GET methods
 
-func MustGetString(url string) string {
+func MustGetString(url string, headers ...H) string {
 	return GetString(url, func(err error) {
 		panic(err)
-	})
+	}, headers...)
 }
 
-func GetString(url string, errHandler ErrHandler) string {
+func GetString(url string, errHandler ErrHandler, headers ...H) string {
 	var s string
 	NewBuilder(url).WhenSuccess(func(resp *http.Response) {
 		bs, err := io.ReadAll(resp.Body)
@@ -185,17 +185,17 @@ func GetString(url string, errHandler ErrHandler) string {
 			panic(fmt.Sprintf("read response data error: %v", err))
 		}
 		s = string(bs)
-	}).WhenFailed(errHandler).Get()
+	}).WhenFailed(errHandler).Headers(headers...).Get()
 	return s
 }
 
-func MustGetBytes(url string) []byte {
+func MustGetBytes(url string, headers ...H) []byte {
 	return GetBytes(url, func(err error) {
 		panic(fmt.Sprintf("request failed: %v", err))
-	})
+	}, headers...)
 }
 
-func GetBytes(url string, errHandler ErrHandler) []byte {
+func GetBytes(url string, errHandler ErrHandler, headers ...H) []byte {
 	var ret []byte
 	NewBuilder(url).WhenSuccess(func(resp *http.Response) {
 		bytes, err := io.ReadAll(resp.Body)
@@ -203,28 +203,28 @@ func GetBytes(url string, errHandler ErrHandler) []byte {
 			panic(fmt.Sprintf("read reponse data error: %v", err))
 		}
 		ret = bytes
-	}).WhenFailed(errHandler).Get()
+	}).WhenFailed(errHandler).Headers(headers...).Get()
 	return ret
 }
 
-func MustGet(url string, handler Handler) {
+func MustGet(url string, handler Handler, headers ...H) {
 	Get(url, handler, func(err error) {
 		panic(err)
-	})
+	}, headers...)
 }
 
-func Get(url string, handler Handler, errHandler ErrHandler) {
-	NewBuilder(url).WhenSuccess(handler).WhenFailed(errHandler).Get()
+func Get(url string, handler Handler, errHandler ErrHandler, headers ...H) {
+	NewBuilder(url).WhenSuccess(handler).WhenFailed(errHandler).Headers(headers...).Get()
 }
 
-func MustGetJson[T any](url string, t T) T {
+func MustGetJson[T any](url string, t T, headers ...H) T {
 	GetJson(url, func(err error) {
 		panic(fmt.Sprintf("request failed: %v", err))
-	}, t)
+	}, t, headers...)
 	return t
 }
 
-func GetJson[T any](url string, errHandler ErrHandler, t T) T {
+func GetJson[T any](url string, errHandler ErrHandler, t T, headers ...H) T {
 	NewBuilder(url).WhenSuccess(func(resp *http.Response) {
 		bs, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -234,7 +234,7 @@ func GetJson[T any](url string, errHandler ErrHandler, t T) T {
 		if err != nil {
 			panic(fmt.Sprintf("unmarshal error: %v", err))
 		}
-	}).WhenFailed(errHandler).Get()
+	}).WhenFailed(errHandler).Headers(headers...).Get()
 	return t
 }
 
