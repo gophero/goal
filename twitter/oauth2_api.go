@@ -18,8 +18,8 @@ type OAuth2Api struct {
 	Tweet *OAuth2TweetApi
 }
 
-func NewOAuth2Api(authApi *OAuth2AuthApi) OAuth2Api {
-	return OAuth2Api{
+func NewOAuth2Api(authApi *OAuth2AuthApi) *OAuth2Api {
+	return &OAuth2Api{
 		Auth:  authApi,
 		User:  NewOAuth2UserApi(),
 		Tweet: NewOAuth2TweetApi(),

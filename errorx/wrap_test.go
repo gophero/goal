@@ -2,6 +2,7 @@ package errorx
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,4 +22,11 @@ func TestWrapf(t *testing.T) {
 
 	err := errors.New("foo")
 	assert.True(t, errors.Is(Wrapf(err, "foo %s", "bar"), err))
+
+	err1 := Wrapf(err, "level1 error")
+	fmt.Println(errors.Is(err1, err)) // true
+	err2 := Wrapf(err1, "level2 error")
+	fmt.Println(errors.Is(err2, err1)) // true
+	fmt.Println(errors.Is(err2, err))  // true
+	fmt.Println(errors.Is(err1, err2)) // false
 }

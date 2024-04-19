@@ -1,13 +1,16 @@
 package twitter
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/gophero/goal/redisx"
 	"github.com/gophero/goal/stringx"
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -30,15 +33,15 @@ type LocalStateMap struct {
 	m map[string]*string
 }
 
-func NewLocalStateMap() LocalStateMap {
-	return LocalStateMap{m: make(map[string]*string)}
+func NewLocalStateMap() StateMap {
+	return &LocalStateMap{m: make(map[string]*string)}
 }
 
-func (l LocalStateMap) Put(key string, state string) {
+func (l *LocalStateMap) Put(key string, state string) {
 	l.m[key] = &state
 }
 
-func (l LocalStateMap) Get(key string) string {
+func (l *LocalStateMap) Get(key string) string {
 	r := l.m[key]
 	if r == nil {
 		return ""
@@ -46,13 +49,36 @@ func (l LocalStateMap) Get(key string) string {
 	return *r
 }
 
-func (l LocalStateMap) Del(key string) string {
+func (l *LocalStateMap) Del(key string) string {
 	r := l.m[key]
+	delete(l.m, key)
 	if r == nil {
 		return ""
 	}
-	l.m[key] = nil
 	return *r
+}
+
+type RedisStateMap struct {
+	key    string
+	client redisx.Client
+}
+
+func NewRedisStateMap(c redisx.Client) StateMap {
+	return &RedisStateMap{client: c, key: fmt.Sprintf("tw:st:mp:%d", time.Now().Unix())}
+}
+
+func (r *RedisStateMap) Put(key string, state string) {
+	r.client.HSetNX(context.TODO(), r.key, key, state)
+}
+
+func (r *RedisStateMap) Get(key string) string {
+	sc := r.client.HGet(context.TODO(), r.key, key)
+	return sc.Val()
+}
+
+func (r *RedisStateMap) Del(key string) string {
+	r.client.HDel(context.TODO(), r.key, key)
+	return ""
 }
 
 type OAuth2AuthApi struct {
@@ -89,6 +115,7 @@ func (o *OAuth2AuthApi) encodeClient(clientId, clientSecret string) string {
 
 func (o *OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, redirectUri string) (AccessToken, error) {
 	var challengeCode = o.sm.Get(state)
+	o.sm.Del(state)
 	if challengeCode == "" { // TODO not graceful
 		return EmptyAccessToken, errors.Wrapf(ApiError, "invalid state")
 	}

@@ -19,6 +19,16 @@ func TestRequestToken(t *testing.T) {
 	fmt.Println(ak)
 }
 
+func TestRequestToken1(t *testing.T) {
+	var redirectUri = "https://jameswoof.com"
+	ak, err := twitter.OAuth2Apis.Auth.RequestAccessToken("MXZ0eDdWdGpDUWlNbXl4X3RJR3g6MTpjaQ", "60IoZVAFKlMAJ-V-oNnfAWIdj0WSQZ5l_yLeSummgoSy0_Ct1C",
+		"WFhKc3h0QkM2VjVHVDZwaUhkZ3puNHRfUFZDX2FOVmRhSmo0bmVEdEw1Wk95OjE3MTM1MTgyNzk2NDI6MToxOmFjOjE", "EC5Eteywmn9p2Pmp", redirectUri)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(ak)
+}
+
 func TestRefreshToken(t *testing.T) {
 	refreshToken := testEnv.refrshToken
 	ss, err := twitter.OAuth2Apis.Auth.RefreshAccessToken(testEnv.setting.ClientId, testEnv.setting.ClientSecret, refreshToken)
