@@ -44,7 +44,7 @@ func TestRespObjBody(t *testing.T) {
 	assert.Nil(t, r.Err())
 	var bdr TestBody
 	obj := r.JsonObj(&bdr).(*TestBody)
-	assert.Equal(t, obj, bdr)
+	assert.Equal(t, obj, &bdr)
 }
 
 func TestRespSliceBody(t *testing.T) {

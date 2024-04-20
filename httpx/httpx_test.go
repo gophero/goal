@@ -350,10 +350,10 @@ func TestRequest(t *testing.T) {
 		s = string(bytes)
 	}).WhenFailed(func(err error) {
 		logger.Require(err == nil, "request should be successful")
-	}).Request()
+	}).ContentType(httpx.ContentTypeApplicationFormUrlencoded).Request(http.MethodGet)
 	logger.Require(html == s, "post result with string should be correct")
 
-	logger.Case("simplest post json")
+	logger.Case("post json")
 	var js string
 	httpx.NewBuilder("http://localhost:1234/json").WhenSuccess(func(resp *http.Response) {
 		bytes, err := io.ReadAll(resp.Body)
@@ -370,6 +370,7 @@ func TestRequest(t *testing.T) {
 		js = string(bytes)
 	}).WhenFailed(func(err error) {
 		logger.Require(err == nil, "request should be successful")
-	}).Post()
+	}).ContentType(httpx.ContentTypeApplicationJson).Request(http.MethodPost)
+
 	logger.Require(js == jsonstr, "post result with string should be correct")
 }

@@ -76,7 +76,8 @@ func (b *httpBuilder) getClient() *http.Client {
 	return b.client
 }
 
-func (b *httpBuilder) Request() *httpBuilder {
+func (b *httpBuilder) Request(method string) {
+	b.method = method
 	req, err := http.NewRequest(b.method, b.url, b.body)
 	if len(b.headers) > 0 {
 		req.Header = b.headers
@@ -85,7 +86,7 @@ func (b *httpBuilder) Request() *httpBuilder {
 
 	if err != nil {
 		b.errHandler(err)
-		return b
+		return
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -94,10 +95,10 @@ func (b *httpBuilder) Request() *httpBuilder {
 	} else {
 		b.callback(resp)
 	}
-	return b
+	return
 }
 
-func (b *httpBuilder) Get() *httpBuilder {
+func (b *httpBuilder) Get() {
 	b.method = http.MethodGet
 	var resp *http.Response
 	var err error
@@ -112,7 +113,7 @@ func (b *httpBuilder) Get() *httpBuilder {
 
 	if err != nil {
 		b.errHandler(err)
-		return b
+		return
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -121,10 +122,10 @@ func (b *httpBuilder) Get() *httpBuilder {
 	} else {
 		b.callback(resp)
 	}
-	return b
+	return
 }
 
-func (b *httpBuilder) Post() *httpBuilder {
+func (b *httpBuilder) Post() {
 	b.method = http.MethodPost
 	var resp *http.Response
 	var err error
@@ -142,7 +143,7 @@ func (b *httpBuilder) Post() *httpBuilder {
 
 	if err != nil {
 		b.errHandler(err)
-		return b
+		return
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -151,7 +152,7 @@ func (b *httpBuilder) Post() *httpBuilder {
 	} else {
 		b.callback(resp)
 	}
-	return b
+	return
 }
 
 func (b *httpBuilder) mergeHeaders() *httpBuilder {
