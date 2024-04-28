@@ -5,12 +5,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/gophero/goal/redisx"
-	"github.com/gophero/goal/stringx"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gophero/goal/redisx"
+	"github.com/gophero/goal/stringx"
 
 	"github.com/pkg/errors"
 )
@@ -114,12 +115,12 @@ func (o *OAuth2AuthApi) encodeClient(clientId, clientSecret string) string {
 }
 
 func (o *OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, redirectUri string) (AccessToken, error) {
-	var challengeCode = o.sm.Get(state)
+	challengeCode := o.sm.Get(state)
 	o.sm.Del(state)
 	if challengeCode == "" { // TODO not graceful
 		return EmptyAccessToken, errors.Wrapf(ApiError, "invalid state")
 	}
-	var body = strings.NewReader(
+	body := strings.NewReader(
 		NewGetParam().
 			Append("code", code).
 			Append("grant_type", "authorization_code").
@@ -154,11 +155,11 @@ func (o *OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, 
 }
 
 func (o *OAuth2AuthApi) RefreshAccessToken(clientId, clientSecret, refreshToken string) (AccessToken, error) {
-	var builder = stringx.NewBuilder()
+	builder := stringx.NewBuilder()
 	builder.WriteString("refresh_token=").WriteString(refreshToken).WriteString("&")
 	builder.WriteString("grant_type=refresh_token").WriteString("&")
 	builder.WriteString("client_id=").WriteString(clientId)
-	var body = strings.NewReader(builder.String())
+	body := strings.NewReader(builder.String())
 	req, err := http.NewRequest(http.MethodPost, o.tokenUrl(), body)
 	if err != nil {
 		return EmptyAccessToken, errors.Wrapf(ApiError, "request error: %v", err)
@@ -185,10 +186,10 @@ func (o *OAuth2AuthApi) RefreshAccessToken(clientId, clientSecret, refreshToken 
 }
 
 func (o *OAuth2AuthApi) RevokeAccessToken(clientId, clientSecret string, token string) error {
-	var builder = stringx.NewBuilder()
+	builder := stringx.NewBuilder()
 	builder.WriteString("token=").WriteString(token).WriteString("&")
 	builder.WriteString("token_type_hint=access_token")
-	var body = strings.NewReader(builder.String())
+	body := strings.NewReader(builder.String())
 	req, err := http.NewRequest(http.MethodPost, o.revokeTokenUrl(), body)
 	if err != nil {
 		return errors.Wrapf(ApiError, "request error: %v", err)
