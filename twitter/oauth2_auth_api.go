@@ -93,12 +93,12 @@ func NewOAuth2AuthApi(sm StateMap) *OAuth2AuthApi {
 	return &OAuth2AuthApi{sm: sm}
 }
 
-func (o *OAuth2AuthApi) AuthorizeUrl(clientID, redirectUri string, scope ...Scope) string {
+func (o *OAuth2AuthApi) AuthorizeUrl(clientId, redirectUri string, scope ...Scope) string {
 	scopes := formatScopes(scope...)
 	code_challenge := stringx.Randn(16)
 	state := stringx.Randn(16)
-	o.sm.Put(state, code_challenge)
-	return fmt.Sprintf(auth2AuthorizeUrlFormat, clientID, redirectUri, scopes, state, code_challenge)
+	o.sm.Put(formatKey(clientId, state), code_challenge)
+	return fmt.Sprintf(auth2AuthorizeUrlFormat, clientId, redirectUri, scopes, state, code_challenge)
 }
 
 func (o *OAuth2AuthApi) tokenUrl() string {
@@ -114,9 +114,13 @@ func (o *OAuth2AuthApi) encodeClient(clientId, clientSecret string) string {
 	return base64.StdEncoding.EncodeToString([]byte(dest))
 }
 
+func formatKey(clientId, key string) string {
+	return clientId + "_" + key
+}
+
 func (o *OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, redirectUri string) (AccessToken, error) {
-	challengeCode := o.sm.Get(state)
-	o.sm.Del(state)
+	challengeCode := o.sm.Get(formatKey(clientId, state))
+	o.sm.Del(formatKey(clientId, state))
 	if challengeCode == "" { // TODO not graceful
 		return EmptyAccessToken, errors.Wrapf(ApiError, "invalid state")
 	}
