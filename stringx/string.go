@@ -1,9 +1,13 @@
 package stringx
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func CutString(max int, s string) string {
@@ -107,7 +111,7 @@ func StartsWith(str string, sep string) bool {
 }
 
 func String(a any) string {
-	var v = reflect.ValueOf(a)
+	v := reflect.ValueOf(a)
 	switch v.Kind() { // 类型的种类Kind，将类型归类，如：int、uint、string、bool、struct、ptr、interface等等
 	case reflect.Invalid: // 零值
 		return "invalid"
@@ -165,7 +169,7 @@ func CamelCaseToUnderscore(s string) string {
 func UnderscoreToCamelCase(s string) string {
 	rs := []rune(s)
 	sb := strings.Builder{}
-	var lastUnderscore = false
+	lastUnderscore := false
 	for i, r := range rs {
 		if i == 0 {
 			if !IsUpperChar(r) {
@@ -185,4 +189,18 @@ func UnderscoreToCamelCase(s string) string {
 		}
 	}
 	return sb.String()
+}
+
+func FormatIntWithComma(d int64) string {
+	p := message.NewPrinter(language.English)
+	return p.Sprintf("%d", d)
+}
+
+func FormatFloatWithComma(d float64, precision ...int) string {
+	p := message.NewPrinter(language.English)
+	if len(precision) > 0 {
+		f := fmt.Sprintf("%%.%df", precision[0])
+		return p.Sprintf(f, d)
+	}
+	return p.Sprintf("%f", d)
 }

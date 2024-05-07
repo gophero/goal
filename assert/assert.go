@@ -47,7 +47,7 @@ func HasElems(c any) {
 }
 
 func Equals(t1 any, t2 any) {
-	Require(t1 != t2, "assert failed, expecting t1 equals t2 but not")
+	Require(t1 == t2, "assert failed, expecting t1 equals t2 but not")
 }
 
 func DeepEquals(t1 any, t2 any) {

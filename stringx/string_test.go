@@ -1,10 +1,12 @@
 package stringx_test
 
 import (
+	"fmt"
+	"testing"
+
 	"github.com/gophero/goal/assert"
 	"github.com/gophero/goal/stringx"
 	"github.com/gophero/goal/testx"
-	"testing"
 )
 
 func TestBlurEmail(t *testing.T) {
@@ -84,4 +86,23 @@ func TestUnderscoreToCamelCase(t *testing.T) {
 		r := stringx.UnderscoreToCamelCase(c[1])
 		tl.Require(r == c[0], "expect result is: %v, but is: %v", c[0], r)
 	}
+}
+
+func TestFormatIntWithComma(t *testing.T) {
+	d := 123456789
+	s := stringx.FormatIntWithComma(int64(d))
+	fmt.Println(s)
+    fmt.Println(s == "123,456,789")
+	assert.Equals("123,456,789", s)
+}
+
+func TestFormatFloatWithComma(t *testing.T) {
+	f := 123456789.987654321
+    fmt.Printf("%f\n",f)
+	s := stringx.FormatFloatWithComma(f)
+	fmt.Println(s)
+	assert.Equals("123,456,789.987654", s)
+	s = stringx.FormatFloatWithComma(f, 2)
+	fmt.Println(s)
+	assert.Equals("123,456,789.99", s)
 }
