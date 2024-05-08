@@ -1,7 +1,6 @@
 package stringx_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/gophero/goal/assert"
@@ -86,23 +85,4 @@ func TestUnderscoreToCamelCase(t *testing.T) {
 		r := stringx.UnderscoreToCamelCase(c[1])
 		tl.Require(r == c[0], "expect result is: %v, but is: %v", c[0], r)
 	}
-}
-
-func TestFormatCommaInt(t *testing.T) {
-	d := 123456789
-	s := stringx.FormatCommaInt(int64(d))
-	fmt.Println(s)
-	fmt.Println(s == "123,456,789")
-	assert.Equals("123,456,789", s)
-}
-
-func TestFormatCommaFloat(t *testing.T) {
-	f := 123456789.987654321
-	fmt.Printf("%f\n", f)
-	s := stringx.FormatCommaFloat(f)
-	fmt.Println(s)
-	assert.Equals("123,456,789.987654", s)
-	s = stringx.FormatCommaFloat(f, 2)
-	fmt.Println(s)
-	assert.Equals("123,456,789.99", s)
 }

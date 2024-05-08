@@ -1,13 +1,9 @@
 package stringx
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
-
-	"golang.org/x/text/language"
-	"golang.org/x/text/message"
 )
 
 func CutString(max int, s string) string {
@@ -189,18 +185,4 @@ func UnderscoreToCamelCase(s string) string {
 		}
 	}
 	return sb.String()
-}
-
-func FormatCommaInt(d int64) string {
-	p := message.NewPrinter(language.English)
-	return p.Sprintf("%d", d)
-}
-
-func FormatCommaFloat(d float64, precision ...int) string {
-	p := message.NewPrinter(language.English)
-	if len(precision) > 0 {
-		f := fmt.Sprintf("%%.%df", precision[0])
-		return p.Sprintf(f, d)
-	}
-	return p.Sprintf("%f", d)
 }

@@ -2,12 +2,13 @@ package mathx
 
 import (
 	"fmt"
-	"github.com/gophero/goal/assert"
 	"math"
 	"math/big"
 	"math/rand"
 	"strings"
 	"testing"
+
+	"github.com/gophero/goal/assert"
 )
 
 func TestRound(t *testing.T) {
@@ -95,10 +96,10 @@ func TestCeilf(t *testing.T) {
 
 func TestTrunc2(t *testing.T) {
 	var f float64
-	//f = -32.8584074
-	//fmt.Println(Trunc(f, 2))
-	//f = 113.03999999999999
-	//fmt.Println(Trunc(f, 2))
+	// f = -32.8584074
+	// fmt.Println(Trunc(f, 2))
+	// f = 113.03999999999999
+	// fmt.Println(Trunc(f, 2))
 	f = 437.09999999999997   // 精度很大，计算机无法准确表示
 	fmt.Printf("%.5f\n", f)  // 437.10000
 	fmt.Println(Trunc(f, 2)) // 437.1
@@ -139,4 +140,21 @@ func FuzzTrunc(f *testing.F) {
 			//}
 		}
 	})
+}
+
+func TestFormatCommaFloat(t *testing.T) {
+	f := 123456789.987654321
+	fmt.Printf("%f\n", f)
+	// default mod
+	s := FmtCommaFloat(f)
+	fmt.Println(s)
+	assert.Equals("123,456,789.987654", s)
+	// half down
+	s = FmtCommaFloat(f, Prec{Prec: 2, Mod: HalfDown})
+	fmt.Println(s)
+	assert.Equals("123,456,789.98", s)
+	// half up
+	s = FmtCommaFloat(f, Prec{Prec: 2, Mod: HalfUp})
+	fmt.Println(s)
+	assert.Equals("123,456,789.99", s)
 }

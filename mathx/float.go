@@ -2,14 +2,31 @@ package mathx
 
 import (
 	"fmt"
-	"github.com/gophero/goal/conv"
-	"github.com/gophero/goal/valuex"
 	"math"
 	"strconv"
+
+	"github.com/gophero/goal/conv"
+	"github.com/gophero/goal/valuex"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+)
+
+type PrecMod int
+
+const (
+	// HalfDown mod will discard half 5, but treat 6 as whole (of decimal points).
+	HalfDown PrecMod = iota
+	// HalfUp mod will treat 5 as whole (of decimal points), but discard 4.
+	HalfUp
 )
 
 type Float interface {
 	~float32 | ~float64
+}
+
+type Prec struct {
+	Prec uint
+	Mod  PrecMod
 }
 
 // Round 将 f 执行四舍五入保留 n 位小数。
@@ -32,10 +49,10 @@ func Trunc[T Float](f T, n int) T {
 		return T(math.Trunc(float64(f)))
 	}
 	base := math.Pow10(n)
-	//x, y := math.Modf(float64(f)) // 损失精度
-	//i := int64(y * base)
-	//y = float64(i) / base
-	//return T(x + y)
+	// x, y := math.Modf(float64(f)) // 损失精度
+	// i := int64(y * base)
+	// y = float64(i) / base
+	// return T(x + y)
 	i := int64(Mul(float64(f), base))
 	x := float64(i) / base
 	return T(x)
@@ -90,4 +107,20 @@ func Ceilr[T Float](f T, n int) T {
 // Ceilrf 将 f 先执行 Cerilr(f, n)，然后再执行 Format 格式化为保留 n 位小数的字符串。
 func Ceilrf[T Float](f T, n int) string {
 	return Format(Ceilr(f, n), n)
+}
+
+func FmtCommaFloat(d float64, precs ...Prec) string {
+	p := message.NewPrinter(language.English)
+	if len(precs) > 0 {
+		precision := precs[0].Prec
+		mod := precs[0].Mod
+		switch mod {
+		case HalfDown:
+			d = Trunc(d, int(precision))
+		default:
+		}
+		f := fmt.Sprintf("%%.%df", precision)
+		return p.Sprintf(f, d)
+	}
+	return p.Sprintf("%f", d)
 }
