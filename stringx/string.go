@@ -191,12 +191,12 @@ func UnderscoreToCamelCase(s string) string {
 	return sb.String()
 }
 
-func FormatIntWithComma(d int64) string {
+func FormatCommaInt(d int64) string {
 	p := message.NewPrinter(language.English)
 	return p.Sprintf("%d", d)
 }
 
-func FormatFloatWithComma(d float64, precision ...int) string {
+func FormatCommaFloat(d float64, precision ...int) string {
 	p := message.NewPrinter(language.English)
 	if len(precision) > 0 {
 		f := fmt.Sprintf("%%.%df", precision[0])

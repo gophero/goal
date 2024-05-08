@@ -88,21 +88,21 @@ func TestUnderscoreToCamelCase(t *testing.T) {
 	}
 }
 
-func TestFormatIntWithComma(t *testing.T) {
+func TestFormatCommaInt(t *testing.T) {
 	d := 123456789
-	s := stringx.FormatIntWithComma(int64(d))
+	s := stringx.FormatCommaInt(int64(d))
 	fmt.Println(s)
-    fmt.Println(s == "123,456,789")
+	fmt.Println(s == "123,456,789")
 	assert.Equals("123,456,789", s)
 }
 
-func TestFormatFloatWithComma(t *testing.T) {
+func TestFormatCommaFloat(t *testing.T) {
 	f := 123456789.987654321
-    fmt.Printf("%f\n",f)
-	s := stringx.FormatFloatWithComma(f)
+	fmt.Printf("%f\n", f)
+	s := stringx.FormatCommaFloat(f)
 	fmt.Println(s)
 	assert.Equals("123,456,789.987654", s)
-	s = stringx.FormatFloatWithComma(f, 2)
+	s = stringx.FormatCommaFloat(f, 2)
 	fmt.Println(s)
 	assert.Equals("123,456,789.99", s)
 }
