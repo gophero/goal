@@ -25,8 +25,12 @@ type Float interface {
 }
 
 type Prec struct {
-	Prec uint
-	Mod  PrecMod
+	prec uint
+	mod  PrecMod
+}
+
+func NewPrec(prec uint, mod PrecMod) Prec {
+	return Prec{prec: prec, mod: mod}
 }
 
 // Round 将 f 执行四舍五入保留 n 位小数。
@@ -112,8 +116,8 @@ func Ceilrf[T Float](f T, n int) string {
 func FmtCommaFloat(d float64, precs ...Prec) string {
 	p := message.NewPrinter(language.English)
 	if len(precs) > 0 {
-		precision := precs[0].Prec
-		mod := precs[0].Mod
+		precision := precs[0].prec
+		mod := precs[0].mod
 		switch mod {
 		case HalfDown:
 			d = Trunc(d, int(precision))

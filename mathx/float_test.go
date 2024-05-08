@@ -150,11 +150,11 @@ func TestFormatCommaFloat(t *testing.T) {
 	fmt.Println(s)
 	assert.Equals("123,456,789.987654", s)
 	// half down
-	s = FmtCommaFloat(f, Prec{Prec: 2, Mod: HalfDown})
+	s = FmtCommaFloat(f, NewPrec(2, HalfDown))
 	fmt.Println(s)
 	assert.Equals("123,456,789.98", s)
 	// half up
-	s = FmtCommaFloat(f, Prec{Prec: 2, Mod: HalfUp})
+	s = FmtCommaFloat(f, NewPrec(2, HalfUp))
 	fmt.Println(s)
 	assert.Equals("123,456,789.99", s)
 }
