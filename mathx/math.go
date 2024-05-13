@@ -1,6 +1,10 @@
 package mathx
 
-import "math/big"
+import (
+	"math/big"
+
+	"github.com/gophero/goal/constraintx"
+)
 
 func Add(addend1 float64, addend2 float64) float64 {
 	result, _ := NewFromFloat(addend1).Add(NewFromFloat(addend2)).Float64()
@@ -52,3 +56,23 @@ func MulBigFloat(multiplicand *big.Float, multiplier *big.Float) *big.Float {
 // func CompareToBigFloat(f1 *big.Float, f2 *big.Float) bool {
 //	return f1.
 // }
+
+func Maxn[T constraintx.Number](ns ...T) T {
+	max := ns[0]
+	var a, b T
+	for i, j := 0, len(ns)-1; i < len(ns)/2 && j > i; {
+		a, b = ns[i], ns[j]
+		if a > b {
+			if a > max {
+				max = a
+			}
+		} else {
+			if b > max {
+				max = b
+			}
+		}
+		i++
+		j--
+	}
+	return max
+}
