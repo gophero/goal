@@ -95,10 +95,12 @@ func NewOAuth2AuthApi(sm StateMap) *OAuth2AuthApi {
 
 func (o *OAuth2AuthApi) AuthorizeUrl(clientId, redirectUri string, scope ...Scope) string {
 	scopes := formatScopes(scope...)
-	code_challenge := stringx.Randn(16)
+	// code_challenge := stringx.Randn(16)
 	state := stringx.Randn(16)
-	o.sm.Put(formatKey(clientId, state), code_challenge)
-	return fmt.Sprintf(auth2AuthorizeUrlFormat, clientId, redirectUri, scopes, state, code_challenge)
+	// o.sm.Put(formatKey(clientId, state), code_challenge)
+	// return fmt.Sprintf(auth2AuthorizeUrlFormat, clientId, redirectUri, scopes, state, code_challenge)
+	// use state as challenge code
+	return fmt.Sprintf(auth2AuthorizeUrlFormat, clientId, redirectUri, scopes, state, state)
 }
 
 func (o *OAuth2AuthApi) tokenUrl() string {
@@ -119,17 +121,19 @@ func formatKey(clientId, key string) string {
 }
 
 func (o *OAuth2AuthApi) RequestAccessToken(clientId, clientSecret, code, state, redirectUri string) (AccessToken, error) {
-	challengeCode := o.sm.Get(formatKey(clientId, state))
-	o.sm.Del(formatKey(clientId, state))
-	if challengeCode == "" { // TODO not graceful
-		return EmptyAccessToken, errors.Wrapf(ApiError, "invalid state")
-	}
+	// challengeCode := o.sm.Get(formatKey(clientId, state))
+	// o.sm.Del(formatKey(clientId, state))
+	// if challengeCode == "" { // TODO not graceful
+	// logx.Default.Errorf("challengecode is empty: %s", formatKey(clientId, state))
+	// return EmptyAccessToken, errors.Wrapf(ApiError, "invalid state")
+	// }
 	body := strings.NewReader(
 		NewGetParam().
 			Append("code", code).
 			Append("grant_type", "authorization_code").
 			Append("redirect_uri", redirectUri).
-			Append("code_verifier", challengeCode).
+			// Append("code_verifier", challengeCode).
+			Append("code_verifier", state).
 			Param(),
 	)
 	req, err := http.NewRequest(http.MethodPost, o.tokenUrl(), body)

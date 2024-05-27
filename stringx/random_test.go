@@ -8,15 +8,17 @@ import (
 )
 
 func TestRand(t *testing.T) {
-	////for i := 0; i < 10; i++ {
-	s := Randn(16)
-	fmt.Println(s)
-	////}
+	for i := 0; i < 10; i++ {
+		s := Randn(16)
+		fmt.Println(s)
+	}
 }
 
 func TestRandId(t *testing.T) {
-	s := RandId()
-	fmt.Println(s)
+	for i := 0; i < 10; i++ {
+		s := RandId()
+		fmt.Println(s)
+	}
 }
 
 func TestCryptoRead(t *testing.T) {
