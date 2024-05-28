@@ -18,7 +18,7 @@ type Error struct {
 
 type Result[T any] struct {
 	Data T    `json:"data"`
-	Meta Meta `json:"meta"`
+	Meta Meta `json:"meta,emmitempty"`
 }
 
 type Meta struct {
