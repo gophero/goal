@@ -1,10 +1,13 @@
 package twitter
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gophero/goal/collection/slicex"
 )
+
+var ApiError = fmt.Errorf("twitter api error")
 
 type Error struct {
 	Status int    `json:"status"`
@@ -49,9 +52,11 @@ func (ff *FieldFilter) AddUserField(ufs ...UserField) *FieldFilter {
 	return ff
 }
 
-type Expansion string
-type TwitterField string
-type UserField string
+type (
+	Expansion    string
+	TwitterField string
+	UserField    string
+)
 
 const (
 	ExpansionPinnedTweetId Expansion = "pinned_tweet_id"

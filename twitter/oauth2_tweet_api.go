@@ -3,7 +3,6 @@ package twitter
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -11,8 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type OAuth2TweetApi struct {
-}
+type OAuth2TweetApi struct{}
 
 func NewOAuth2TweetApi() *OAuth2TweetApi {
 	return &OAuth2TweetApi{}
@@ -22,8 +20,8 @@ func NewOAuth2TweetApi() *OAuth2TweetApi {
 // OAuth 2.0 scopes need: tweet.read,tweet.write,users.read
 func (o *OAuth2TweetApi) PostTweet(accessToken string, param PostTweetParam) (*PostTweetResp, error) {
 	var err error
-	var url = fmt.Sprintf(oauth2ApiUrlFormat, "/tweets")
-	var body = bytes.NewReader(param.Json())
+	url := fmtUrl(oauth2ApiUrlFormat, "/tweets")
+	body := bytes.NewReader(param.Json())
 	req, err := http.NewRequest(http.MethodGet, url, body)
 	if err != nil {
 		return &PostTweetResp{}, errors.Wrapf(ApiError, "request error: %v", err)
@@ -51,12 +49,12 @@ func (o *OAuth2TweetApi) PostTweet(accessToken string, param PostTweetParam) (*P
 }
 
 func (o *OAuth2TweetApi) RetweetBy(accessToken, tweetId string, ff *FieldFilter, options ...GetParamOption) ([]*UserInfo, Meta, error) {
-	var url = fmt.Sprintf(oauth2ApiUrlFormat, "/tweets/"+tweetId+"/retweeted_by")
-	var params = NewGetParam().FilterFields(ff)
+	url := fmtUrl(oauth2ApiUrlFormat, "/tweets/"+tweetId+"/retweeted_by")
+	params := NewGetParam().FilterFields(ff)
 	for _, p := range options {
 		p(params)
 	}
-	var body = strings.NewReader(params.Param())
+	body := strings.NewReader(params.Param())
 	req, err := http.NewRequest(http.MethodGet, url, body)
 	if err != nil {
 		return []*UserInfo{}, Meta{}, errors.Wrapf(ApiError, "request error: %v", err)
@@ -82,5 +80,4 @@ func (o *OAuth2TweetApi) RetweetBy(accessToken, tweetId string, ff *FieldFilter,
 	return result.Data, result.Meta, nil
 }
 
-type Tweet struct {
-}
+type Tweet struct{}

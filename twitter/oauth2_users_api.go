@@ -2,7 +2,6 @@ package twitter
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -17,22 +16,20 @@ const (
 	tweetFieldKey = "tweet.fields"
 )
 
-type OAuth2UserApiFormParamOptions struct {
-}
+type OAuth2UserApiFormParamOptions struct{}
 
-type OAuth2UserApi struct {
-}
+type OAuth2UserApi struct{}
 
 func NewOAuth2UserApi() *OAuth2UserApi {
 	return &OAuth2UserApi{}
 }
 
 func (o *OAuth2UserApi) meUrl() string {
-	return fmt.Sprintf(oauth2ApiUrlFormat, "/users/me")
+	return fmtUrl(oauth2ApiUrlFormat, "/users/me")
 }
 
 func (o *OAuth2UserApi) Me(accessToken string, ff *FieldFilter) (*UserInfo, error) {
-	var body = strings.NewReader(NewGetParam().FilterFields(ff).Param())
+	body := strings.NewReader(NewGetParam().FilterFields(ff).Param())
 	req, err := http.NewRequest(http.MethodGet, o.meUrl(), body)
 	if err != nil {
 		return nil, errors.Wrapf(ApiError, "request error: %v", err)
@@ -59,12 +56,12 @@ func (o *OAuth2UserApi) Me(accessToken string, ff *FieldFilter) (*UserInfo, erro
 }
 
 func (o *OAuth2UserApi) Followers(accessToken, id string, ff *FieldFilter, options ...GetParamOption) ([]*UserInfo, Meta, error) {
-	var url = fmt.Sprintf(oauth2ApiUrlFormat, "/users/"+id+"/followers")
-	var params = NewGetParam().FilterFields(ff)
+	url := fmtUrl(oauth2ApiUrlFormat, "/users/"+id+"/followers")
+	params := NewGetParam().FilterFields(ff)
 	for _, p := range options {
 		p(params)
 	}
-	var body = strings.NewReader(params.Param())
+	body := strings.NewReader(params.Param())
 	req, err := http.NewRequest(http.MethodGet, url, body)
 	if err != nil {
 		return []*UserInfo{}, Meta{}, errors.Wrapf(ApiError, "request error: %v", err)

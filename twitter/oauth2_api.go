@@ -1,15 +1,5 @@
 package twitter
 
-import (
-	"fmt"
-)
-
-const (
-	oauth2ApiUrlFormat = "https://api.twitter.com/2%s"
-)
-
-var ApiError = fmt.Errorf("twitter api error")
-
 var OAuth2Apis = NewOAuth2Api(NewOAuth2AuthApi(nil))
 
 type OAuth2Api struct {

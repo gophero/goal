@@ -16,10 +16,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	auth2AuthorizeUrlFormat = "https://twitter.com/i/oauth2/authorize?response_type=code&client_id=%s&redirect_uri=%s&scope=%s&state=%s&code_challenge=%s&code_challenge_method=plain"
-)
-
 var EmptyAccessToken = AccessToken{}
 
 type StateMap interface {
@@ -100,15 +96,15 @@ func (o *OAuth2AuthApi) AuthorizeUrl(clientId, redirectUri string, scope ...Scop
 	// o.sm.Put(formatKey(clientId, state), code_challenge)
 	// return fmt.Sprintf(auth2AuthorizeUrlFormat, clientId, redirectUri, scopes, state, code_challenge)
 	// use state as challenge code
-	return fmt.Sprintf(auth2AuthorizeUrlFormat, clientId, redirectUri, scopes, state, state)
+	return fmtUrl(auth2AuthorizeUrlFormat, clientId, redirectUri, scopes, state, state)
 }
 
 func (o *OAuth2AuthApi) tokenUrl() string {
-	return fmt.Sprintf(oauth2ApiUrlFormat, "/oauth2/token")
+	return fmtUrl(oauth2ApiUrlFormat, "/oauth2/token")
 }
 
 func (o *OAuth2AuthApi) revokeTokenUrl() string {
-	return fmt.Sprintf(oauth2ApiUrlFormat, "/oauth2/revoke")
+	return fmtUrl(oauth2ApiUrlFormat, "/oauth2/revoke")
 }
 
 func (o *OAuth2AuthApi) encodeClient(clientId, clientSecret string) string {
