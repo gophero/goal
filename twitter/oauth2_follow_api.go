@@ -9,13 +9,17 @@ import (
 	"net/http"
 )
 
-type Oauth2FollowApi struct{}
+type OAuth2FollowApi struct{}
 
-func (o *Oauth2FollowApi) followUrl(userId string) string {
+func NewOAuth2FollowApi() *OAuth2FollowApi {
+	return &OAuth2FollowApi{}
+}
+
+func (o *OAuth2FollowApi) followUrl(userId string) string {
 	return fmtUrl(followUrl, userId)
 }
 
-func (o *Oauth2FollowApi) Follow(accessToken string, userId, targetUserId string) (FollowRet, error) {
+func (o *OAuth2FollowApi) Follow(accessToken string, userId, targetUserId string) (FollowRet, error) {
 	url := o.followUrl(userId)
 	m := map[string]any{}
 	m["target_user_id"] = targetUserId
@@ -50,7 +54,7 @@ func (o *Oauth2FollowApi) Follow(accessToken string, userId, targetUserId string
 	return result.Data, nil
 }
 
-func (o *Oauth2FollowApi) UnFollow() {
+func (o *OAuth2FollowApi) UnFollow() {
 }
 
 type FollowRet struct {
