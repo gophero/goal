@@ -1,12 +1,12 @@
 package twitter
 
 import (
+	"bytes"
 	"encoding/json"
+	"github.com/gophero/goal/errorx"
+	"github.com/pkg/errors"
 	"io"
 	"net/http"
-	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type Oauth2FollowApi struct{}
@@ -17,16 +17,19 @@ func (o *Oauth2FollowApi) followUrl(userId string) string {
 
 func (o *Oauth2FollowApi) Follow(accessToken string, userId, targetUserId string) (FollowRet, error) {
 	url := o.followUrl(userId)
-	body := strings.NewReader(
-		NewGetParam().
-			Append("target_user_id", targetUserId).
-			Param(),
-	)
+	m := map[string]any{}
+	m["target_user_id"] = targetUserId
+	bs, err := json.Marshal(m)
+	if err != nil {
+		return FollowRet{}, errorx.Wrapf(err, "param error")
+	}
+	body := bytes.NewReader(bs)
+
 	req, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		return FollowRet{}, errors.Wrapf(ApiError, "request error: %v", err)
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+accessToken)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -36,7 +39,7 @@ func (o *Oauth2FollowApi) Follow(accessToken string, userId, targetUserId string
 		return FollowRet{}, errors.Wrapf(ApiError, "request error: %v", resp.Status)
 	}
 
-	bs, err := io.ReadAll(resp.Body)
+	bs, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return FollowRet{}, err
 	}

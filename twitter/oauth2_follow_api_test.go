@@ -9,6 +9,9 @@ import (
 
 var followoApi = &twitter.Oauth2FollowApi{}
 
+var target_userid = "1779099104049876992"
+var self_userid = "1776491059318792192"
+
 func TestOauth2FollowApi_Follow(t *testing.T) {
 	type args struct {
 		accessToken  string
@@ -23,7 +26,11 @@ func TestOauth2FollowApi_Follow(t *testing.T) {
 		wantErr bool
 	}{
 		// Add test cases.
-		{name: "sucess", o: followoApi, args: args{userId: "1776491059318792192", accessToken: testEnv.accessToken, targetUserId: "1256769111490617341"}, want: twitter.FollowRet{Following: true, PendingFollow: false}, wantErr: false},
+		{name: "success", o: followoApi, args: args{
+			userId:       self_userid,
+			accessToken:  testEnv.accessToken,
+			targetUserId: target_userid,
+		}, want: twitter.FollowRet{Following: true, PendingFollow: false}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
