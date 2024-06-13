@@ -1,10 +1,11 @@
 package slicex
 
 import (
-	"github.com/gophero/goal/stringx"
 	"reflect"
 	"sort"
 	"strings"
+
+	"github.com/gophero/goal/stringx"
 )
 
 // basic functions
@@ -104,7 +105,7 @@ func (s S[T]) Join(sep string) string {
 // Union returns all elements of the two slices, i.e. the result is and union set.
 func (s S[T]) Union(dest []T) S[T] {
 	var ret []T = s
-	var d = Wrap(dest)
+	d := Wrap(dest)
 	for _, a := range s {
 		d = d.Delete(a)
 	}
@@ -132,8 +133,8 @@ func (s S[T]) Intersect(dest []T) S[T] {
 
 // Diff returns the different elements between source and dest slice.
 func (s S[T]) Diff(dest []T) S[T] {
-	var ret = s.Union(dest)
-	var it = s.Intersect(dest)
+	ret := s.Union(dest)
+	it := s.Intersect(dest)
 	return Wrap(Wrap(ret).Remove(it))
 }
 
@@ -144,7 +145,7 @@ func (s S[T]) Remove(dest []T) S[T] {
 
 func (s S[T]) RemoveDuplicate() S[T] {
 	var ret []T
-	var mp = make(map[T]struct{})
+	mp := make(map[T]struct{})
 	for i := 0; i < len(s); i++ {
 		if _, ok := mp[s[i]]; !ok {
 			ret = append(ret, s[i])
@@ -225,4 +226,8 @@ func (s S[T]) Sort(less func(x, y T) bool) SortableSlice[T] {
 func (s SortableSlice[T]) Reverse() S[T] {
 	sort.Sort(sort.Reverse(s))
 	return s.slice
+}
+
+func (s SortableSlice[T]) Raw() []T {
+	return s.slice.Raw()
 }
