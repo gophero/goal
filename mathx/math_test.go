@@ -65,3 +65,31 @@ func randomInts() []int {
 	}
 	return ints
 }
+
+func TestMinn(t *testing.T) {
+	ints := []int{-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	assert.Equal(t, Minn(ints...), -1)
+	assert.Equal(t, minn(ints...), -1)
+	assert.Equal(t, minn(ints...), Minn(ints...))
+	for i := 0; i < 1000; i++ {
+		ints = randomInts()
+		assert.Equal(t, minn(ints...), Minn(ints...))
+	}
+
+	ints = []int{1, 1, 1, 1, 1}
+	assert.Equal(t, 1, Minn(ints...))
+
+	ints = []int{-1, -1, -1, -1}
+	assert.Equal(t, -1, Minn(ints...))
+}
+
+func minn[T constraintx.Number](ns ...T) T {
+	var min, tmp T = ns[0], ns[0]
+	for i := 0; i < len(ns); i++ {
+		tmp = ns[i]
+		if min > tmp {
+			min = tmp
+		}
+	}
+	return min
+}

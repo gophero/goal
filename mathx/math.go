@@ -76,3 +76,23 @@ func Maxn[T constraintx.Number](ns ...T) T {
 	}
 	return max
 }
+
+func Minn[T constraintx.Number](ns ...T) T {
+	min := ns[0]
+	var a, b T
+	for i, j := 0, len(ns)-1; i < len(ns)/2 && j > i; {
+		a, b = ns[i], ns[j]
+		if a < b {
+			if a < min {
+				min = a
+			}
+		} else {
+			if b < min {
+				min = b
+			}
+		}
+		i++
+		j--
+	}
+	return min
+}
