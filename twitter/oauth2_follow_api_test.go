@@ -10,7 +10,7 @@ import (
 var followoApi = &twitter.OAuth2FollowApi{}
 
 var target_userid = "1655224265766240257"
-var self_userid = "1776491059318792192"
+var self_userid = "1519255422300868609"
 
 func TestOauth2FollowApi_Follow(t *testing.T) {
 	type args struct {
