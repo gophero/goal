@@ -17,7 +17,8 @@ var (
 
 func TestAlwaysSuccess(t *testing.T) {
 	for i := 0; i < 100; i++ {
-		if !retry.Do(succ, 10) {
+		b, _ := retry.Do(succ, 10)
+		if !b {
 			t.Errorf("test failed")
 			break
 		}
@@ -26,7 +27,8 @@ func TestAlwaysSuccess(t *testing.T) {
 
 func TestAlwaysFail(t *testing.T) {
 	for i := 0; i < 100; i++ {
-		if retry.Do(fail, 0) {
+		b, _ := retry.Do(fail, 0)
+		if b {
 			t.Errorf("test failed")
 			break
 		}
@@ -46,6 +48,7 @@ func TestDo(t *testing.T) {
 			return nil
 		}
 	}
-	b := retry.Do(randFunc, 4)
-	assert.True(t, b, !hasErr)
+	b, err := retry.Do(randFunc, 4)
+	assert.True(t, b, !hasErr && err == nil)
+	assert.True(t, b, hasErr && err != nil)
 }
